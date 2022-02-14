@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n
+    labels:
+      # The labels are useful for Traefik only
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_net"
+      # Get the routes from http
+      - "traefik.http.routers.n8n-${NAME}_router.rule=Host(`n8n-${DOMAIN}`) || Host(`www.n8n-${DOMAIN}`)"
+      - "traefik.http.routers.n8n-${NAME}_router.entrypoints=web"
+        # Redirect these routes to https
+      - "traefik.http.middlewares.n8n_${NAME}_redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.n8n-${NAME}_router.middlewares=n8n-${NAME}_redirect-to-https@docker"
+      # Get the routes from https
+      - "traefik.http.routers.n8n-${NAME}_router-secured.rule=Host(`n8n-${DOMAIN}`) || Host(`www.n8n-${DOMAIN}`)"
+      - "traefik.http.routers.n8n-${NAME}_router-secured.entrypoints=web-secure"
+      # Apply autentificiation with http challenge
+      - "traefik.http.routers.n8n-${NAME}_router-secured.tls=true"
+      - "traefik.http.routers.n8n-${NAME}_router-secured.tls.certresolver=myhttpchallenge"
+    volumes:
+      - n8n:/home/node/.n8n
+    environment:
+      DB_MYSQLDB_HOST: db
+      #DB_MYSQLDB_PORT
+      DB_MYSQLDB_USER: ${NAME}-usr
+      DB_MYSQLDB_PASSWORD: Lkjpoi098
+      DB_MYSQLDB_DATABASE: ${NAME}-wp
+      ##WORDPRESS_TABLE_PREFIX: ${NAME}_
+    networks:
+      - proxy
+      - sql
+  
+  
+  # nocodb:
+  #   image: nocodb:nocodb:latest
+  #   labels:
+  #     # The labels are useful for Traefik only
+  #     - "traefik.enable=true"
+  #     - "traefik.docker.network=traefik_net"
+  #     # Get the routes from http
+  #     - 'traefik.http.routers.nocodb-ttl_router.rule=Host(`nocodb-ttl.${DOMAIN-saia.ar}`)'
+  #     - 'traefik.http.routers.nocodb-ttl_router.entrypoints=web'
+  #       # Redirect these routes to https
+  #     - 'traefik.http.middlewares.nocodb-ttl_redirect-to-https.redirectscheme.scheme=https'
+  #     - 'traefik.http.routers.nocodb-ttl_router.middlewares=nocodb-ttl_redirect-to-https@docker'
+  #     # Get the routes from https
+  #     - 'traefik.http.routers.nocodb-ttl_router-secured.rule=Host(`${DOMAIN-saia.ar}`)'
+  #     - 'traefik.http.routers.nocodb-ttl_router-secured.entrypoints=web-secure'
+  #     # Apply autentificiation with http challenge
+  #     - 'traefik.http.routers.nocodb-ttl_router-secured.tls=true'
+  #     - 'traefik.http.routers.nocodb-ttl_router-secured.tls.certresolver=myhttpchallenge'
+  wordpress:
+    image: wordpress:${WP_VERSION-5.8-php8.0-apache}
+    labels:
+      # The labels are useful for Traefik only
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_net"
+      # Get the routes from http
+      - "traefik.http.routers.${NAME}_router.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.${NAME}_router.entrypoints=web"
+        # Redirect these routes to https
+      - "traefik.http.middlewares.${NAME}_redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.${NAME}_router.middlewares=${NAME}_redirect-to-https@docker"
+      # Get the routes from https
+      - "traefik.http.routers.${NAME}_router-secured.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.${NAME}_router-secured.entrypoints=web-secure"
+      # Apply autentificiation with http challenge
+      - "traefik.http.routers.${NAME}_router-secured.tls=true"
+      - "traefik.http.routers.${NAME}_router-secured.tls.certresolver=myhttpchallenge"
+    configs:
+      - source: php_upload_64M
+        target: /usr/local/etc/php/conf.d/custom.ini
+        mode: 0440
+    volumes:
+      - wordpress:/var/www/html/wp-content
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${NAME}-usr
+      WORDPRESS_DB_PASSWORD: Lkjpoi098
+      WORDPRESS_DB_NAME: ${NAME}-wp
+      ##WORDPRESS_TABLE_PREFIX: ${NAME}_
+    networks:
+      - proxy
+      - sql
+      
+  filebrowser:
+    image: hurlenko/filebrowser
+    labels:
+      # The labels are useful for Traefik only
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_net"
+      # Get the routes from http
+      - "traefik.http.routers.files_${NAME}_router.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+      - "traefik.http.routers.files_${NAME}_router.entrypoints=web"
+        # Redirect these routes to https
+      - "traefik.http.middlewares.files_${NAME}_redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.files_${NAME}_router.middlewares=files_${NAME}_redirect-to-https@docker"
+      # Get the routes from https
+      - "traefik.http.routers.files_${NAME}_router-secured.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+      - "traefik.http.routers.files_${NAME}_router-secured.entrypoints=web-secure"
+      # Apply autentificiation with http challenge
+      - "traefik.http.routers.files_${NAME}_router-secured.tls=true"
+      - "traefik.http.routers.files_${NAME}_router-secured.tls.certresolver=myhttpchallenge"
+    environment:
+      FB_BASEURL: "/${NAME}/"
+    volumes:
+      - wordpress:/data/${NAME}/wp-content
+      - filebrowser_data:/config
+    networks:
+      - proxy   
+  
+
+networks:
+  sql:
+    external: true
+    name: sql_net
+  proxy:
+    external: true
+    name: traefik_net
+
+volumes:
+  filebrowser_data:
+  n8n:
+  wordpress:
+  ssh_vol:
+    external: true
+    
+configs:
+  php_upload_64M:
+    external: true
