@@ -1,5 +1,20 @@
 version: '3.8'
 
+# Requires
+# Net mariadb-public
+# Net traefik-public
+# Config php_upload_64M
+# Dir /wp_m34/${NAME}
+# Dir /wp_m34/${NAME}/wordpress
+# Dir /wp_m34/${NAME}/filebrowser_config
+# Secrets   - mariadb-user - mariadb-password
+
+secrets:
+  - mariadb-user:
+      external: true
+  - mariadb-password:
+      external: true
+
 networks:
   db:
     external: true
@@ -7,74 +22,81 @@ networks:
   ingress:
     external: true
     name: traefik-public
-
-volumes:
-  filebrowser_data:
-  wordpress:
-  ssh_vol:
-    external: true
     
 configs:
   php_upload_64M:
     external: true
+
 services:
   wordpress:
     image: wordpress:${WP_VERSION-5.8-php8.0-apache}
-    labels:
-      # The labels are useful for Traefik only
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      # Get the routes from http
-      - "traefik.http.routers.${NAME}_router.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
-      - "traefik.http.routers.${NAME}_router.entrypoints=web"
-        # Redirect these routes to https
-      - "traefik.http.middlewares.${NAME}_redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.${NAME}_router.middlewares=${NAME}_redirect-to-https@docker"
-      # Get the routes from https
-      - "traefik.http.routers.${NAME}_router-secured.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
-      - "traefik.http.routers.${NAME}_router-secured.entrypoints=web-secure"
-      # Apply autentificiation with http challenge
-      - "traefik.http.routers.${NAME}_router-secured.tls=true"
-      - "traefik.http.routers.${NAME}_router-secured.tls.certresolver=myhttpchallenge"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.gluster.volume == wp_m34
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+         #  https router
+        - traefik.http.routers.wordpress_${NAME}-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
+        - traefik.http.routers.wordpress_${NAME}-http.entrypoints=http
+        - traefik.http.routers.wordpress_${NAME}-http.middleware=https-redirect
+        #  https router
+        - traefik.http.routers.${NAME}_wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
+        - traefik.http.routers.${NAME}_wordpress-https.entrypoints=https
+        - traefik.http.routers.${NAME}_wordpress-https.tls=true
+        - traefik.http.routers.${NAME}_wordpress-https.tls.certresolver=le
+        #services
+        - traefik.http.services.${NAME}_wordpress.loadbalancer.server.port=${WP_PORT-80}
     configs:
       - source: php_upload_64M
         target: /usr/local/etc/php/conf.d/custom.ini
         mode: 0440
     volumes:
-      - wordpress:/var/www/html
+      - /wp_m34/${NAME}/wordpress:/var/www/html
+    secrets:
+      - mariadb-host
+      - mariadb-user
+      - mariadb-password
     environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_USER: ${NAME}-usr
-      WORDPRESS_DB_PASSWORD: Lkjpoi098
-      WORDPRESS_DB_NAME: ${NAME}-wp
-      ##WORDPRESS_TABLE_PREFIX: ${NAME}_
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER_FILE: /run/secrets/mariadb-user
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
+      WORDPRESS_DB_NAME: ${NAME}_wordpress
+      WORDPRESS_TABLE_PREFIX: ${NAME}_
     networks:
       - ingress
       - db
       
   filebrowser:
     image: hurlenko/filebrowser
-    labels:
-      # The labels are useful for Traefik only
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik-public"
-      # Get the routes from http
-      - "traefik.http.routers.files_${NAME}_router.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
-      - "traefik.http.routers.files_${NAME}_router.entrypoints=web"
-        # Redirect these routes to https
-      - "traefik.http.middlewares.files_${NAME}_redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.files_${NAME}_router.middlewares=files_${NAME}_redirect-to-https@docker"
-      # Get the routes from https
-      - "traefik.http.routers.files_${NAME}_router-secured.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
-      - "traefik.http.routers.files_${NAME}_router-secured.entrypoints=web-secure"
-      # Apply autentificiation with http challenge
-      - "traefik.http.routers.files_${NAME}_router-secured.tls=true"
-      - "traefik.http.routers.files_${NAME}_router-secured.tls.certresolver=myhttpchallenge"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.gluster.volume == wp_m34
+          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+         #  https router
+        - traefik.http.routers.wordpress_${NAME}-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+        - traefik.http.routers.wordpress_${NAME}-http.entrypoints=http
+        - traefik.http.routers.wordpress_${NAME}-http.middleware=https-redirect
+        #  https router
+        - traefik.http.routers.wordpress_${NAME}-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+        - traefik.http.routers.wordpress_${NAME}-https.entrypoints=https
+        - traefik.http.routers.wordpress_${NAME}-https.tls=true
+        - traefik.http.routers.wordpress_${NAME}-https.tls.certresolver=le
+        #services
+        - traefik.http.services.wordpress_${NAME}.loadbalancer.server.port=${FB_PORT-80}
     environment:
       FB_BASEURL: "/${NAME}/"
     volumes:
-      - wordpress:/data/${NAME}
-      - filebrowser_data:/config
+      - /wp_m34/${NAME}/wordpress:/data/${NAME}
+      - /wp_m34/${NAME}/filebrowser_config:/config
     networks:
       - ingress   
   
