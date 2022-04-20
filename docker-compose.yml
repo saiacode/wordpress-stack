@@ -10,12 +10,12 @@ version: '3.8'
 # Secrets   - mariadb-user - mariadb-password
 
 secrets:
-  - mariadb-user:
-      external: true
-      name: ${MARIADB_USER}
-  - mariadb-password:
-      external: true
-      name: ${MARIADB_PASSWORD}
+  mariadb-user:
+    external: true
+    name: ${MARIADB_USER}
+  mariadb-password:
+    external: true
+    name: ${MARIADB_PASSWORD}
 
 networks:
   db:
