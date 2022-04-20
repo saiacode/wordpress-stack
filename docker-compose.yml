@@ -12,8 +12,10 @@ version: '3.8'
 secrets:
   - mariadb-user:
       external: true
+      name: ${MARIADB_USER}
   - mariadb-password:
       external: true
+      name: ${MARIADB_PASSWORD}
 
 networks:
   db:
@@ -39,7 +41,7 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-         #  https router
+         #  http router
         - traefik.http.routers.wordpress_${NAME}-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.wordpress_${NAME}-http.entrypoints=http
         - traefik.http.routers.wordpress_${NAME}-http.middleware=https-redirect
@@ -57,14 +59,13 @@ services:
     volumes:
       - /wp_m34/${NAME}/wordpress:/var/www/html
     secrets:
-      - mariadb-host
       - mariadb-user
       - mariadb-password
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER_FILE: /run/secrets/mariadb-user
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
-      WORDPRESS_DB_NAME: ${NAME}_wordpress
+      WORDPRESS_DB_NAME: ${NAME}-wp
       WORDPRESS_TABLE_PREFIX: ${NAME}_
     networks:
       - ingress
