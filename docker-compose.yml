@@ -46,7 +46,7 @@ services:
         - "traefik.constraint-label=traefik-public"
         - "traefik.http.routers.stgwp1-wordpress-http.rule=Host(`stgwp1.cloud.saia.ar`) || Host(`www.stgwp1.cloud.saia.ar`)"
         - "traefik.http.routers.stgwp1-wordpress-http.entrypoints=http"
-        - "traefik.http.routers.stgwp1-wordpress-http.middleware=https-redirect"
+        - "traefik.http.routers.stgwp1-wordpress-http.middlewares=https-redirect"
         - "traefik.http.routers.stgwp1-wordpress-https.rule=Host(`stgwp1.cloud.saia.ar`) || Host(`www.stgwp1.cloud.saia.ar`)"
         - "traefik.http.routers.stgwp1-wordpress-https.entrypoints=https"
         - "traefik.http.routers.stgwp1-wordpress-https.tls=true"
