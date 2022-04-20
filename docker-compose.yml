@@ -41,17 +41,17 @@ services:
           - node.labels.gluster.volume == wp_m34
           - node.role == worker
       labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
-        - traefik.http.routers.${NAME}-wordpress-http.entrypoints=http
-        - traefik.http.routers.${NAME}-wordpress-http.middleware=https-redirect
-        - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
-        - traefik.http.routers.${NAME}-wordpress-https.entrypoints=https
-        - traefik.http.routers.${NAME}-wordpress-https.tls=true
-        - traefik.http.routers.${NAME}-wordpress-https.tls.certresolver=le
-        - traefik.http.services.${NAME}-wordpress.loadbalancer.server.port=${WP_PORT-80}
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+        - "traefik.http.routers.${NAME}-wordpress-http.entrypoints=http"
+        - "traefik.http.routers.${NAME}-wordpress-http.middleware=https-redirect"
+        - "traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+        - "traefik.http.routers.${NAME}-wordpress-https.entrypoints=https"
+        - "traefik.http.routers.${NAME}-wordpress-https.tls=true"
+        - "traefik.http.routers.${NAME}-wordpress-https.tls.certresolver=le"
+        - "traefik.http.services.${NAME}-wordpress.loadbalancer.server.port=${WP_PORT-80}"
     configs:
       - source: php_upload_64M
         target: /usr/local/etc/php/conf.d/custom.ini
@@ -70,32 +70,3 @@ services:
     networks:
       - ingress
       - db
-      
-  filebrowser:
-    image: hurlenko/filebrowser
-    deploy:
-      placement:
-        constraints:
-          - node.labels.gluster.volume == wp_m34
-          - node.role == worker
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
-        - traefik.http.routers.${NAME}-filebrowser-http.entrypoints=http
-        - traefik.http.routers.${NAME}-filebrowser-http.middleware=https-redirect
-        - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
-        - traefik.http.routers.${NAME}-filebrowser-https.entrypoints=https
-        - traefik.http.routers.${NAME}-filebrowser-https.tls=true
-        - traefik.http.routers.${NAME}-filebrowser-https.tls.certresolver=le
-        - traefik.http.services.${NAME}-filebrowser.loadbalancer.server.port=${FB_PORT-80}
-    environment:
-      FB_BASEURL: "/${NAME}/"
-    volumes:
-      - /wp_m34/${NAME}/wordpress:/data/${NAME}
-      - /wp_m34/${NAME}/filebrowser_config:/config
-    networks:
-      - ingress   
-  
-
