@@ -4,8 +4,8 @@ version: '3.8'
 # Net mariadb-public
 # Net traefik-public
 # Config php_upload_64M
-# Dir /wp_m34/${NAME}/wordpress
-# Dir /wp_m34/${NAME}/filebrowser_config
+# Dir /wp_m34/stgwp1/wordpress
+# Dir /wp_m34/stgwp1/filebrowser_config
 # Secrets   - MARIADB_USER_SECRET - MARIADB_PASSWORD_SECRET 
 # NAME required
 # DOMAIN required
@@ -44,20 +44,20 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik-public"
         - "traefik.constraint-label=traefik-public"
-        - "traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
-        - "traefik.http.routers.${NAME}-wordpress-http.entrypoints=http"
-        - "traefik.http.routers.${NAME}-wordpress-http.middleware=https-redirect"
-        - "traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
-        - "traefik.http.routers.${NAME}-wordpress-https.entrypoints=https"
-        - "traefik.http.routers.${NAME}-wordpress-https.tls=true"
-        - "traefik.http.routers.${NAME}-wordpress-https.tls.certresolver=le"
-        - "traefik.http.services.${NAME}-wordpress.loadbalancer.server.port=${WP_PORT-80}"
+        - "traefik.http.routers.stgwp1-wordpress-http.rule=Host(`stgwp1.cloud.saia.ar`) || Host(`www.stgwp1.cloud.saia.ar`)"
+        - "traefik.http.routers.stgwp1-wordpress-http.entrypoints=http"
+        - "traefik.http.routers.stgwp1-wordpress-http.middleware=https-redirect"
+        - "traefik.http.routers.stgwp1-wordpress-https.rule=Host(`stgwp1.cloud.saia.ar`) || Host(`www.stgwp1.cloud.saia.ar`)"
+        - "traefik.http.routers.stgwp1-wordpress-https.entrypoints=https"
+        - "traefik.http.routers.stgwp1-wordpress-https.tls=true"
+        - "traefik.http.routers.stgwp1-wordpress-https.tls.certresolver=le"
+        - "traefik.http.services.stgwp1-wordpress.loadbalancer.server.port=${WP_PORT-80}"
     configs:
       - source: php_upload_64M
         target: /usr/local/etc/php/conf.d/custom.ini
         mode: 0440
     volumes:
-      - /wp_m34/${NAME}/wordpress:/var/www/html
+      - /wp_m34/stgwp1/wordpress:/var/www/html
     secrets:
       - mariadb-user
       - mariadb-password
@@ -65,8 +65,8 @@ services:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_USER_FILE: /run/secrets/mariadb-user
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
-      WORDPRESS_DB_NAME: ${NAME}-wp
-      WORDPRESS_TABLE_PREFIX: ${NAME}_
+      WORDPRESS_DB_NAME: stgwp1-wp
+      WORDPRESS_TABLE_PREFIX: stgwp1_
     networks:
       - ingress
       - db
