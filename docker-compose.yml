@@ -46,7 +46,7 @@ services:
         - traefik.constraint-label=traefik-public
         - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.${NAME}-wordpress-http.entrypoints=http
-        - traefik.http.routers.${NAME}-wordpress-http.middleware=https-redirect
+        - traefik.http.routers.${NAME}-wordpress-http.middlewares=https-redirect
         - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.${NAME}-wordpress-https.entrypoints=https
         - traefik.http.routers.${NAME}-wordpress-https.tls=true
@@ -84,7 +84,7 @@ services:
         - traefik.constraint-label=traefik-public
         - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
         - traefik.http.routers.${NAME}-filebrowser-http.entrypoints=http
-        - traefik.http.routers.${NAME}-filebrowser-http.middleware=https-redirect
+        - traefik.http.routers.${NAME}-filebrowser-http.middlewares=https-redirect
         - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
         - traefik.http.routers.${NAME}-filebrowser-https.entrypoints=https
         - traefik.http.routers.${NAME}-filebrowser-https.tls=true
