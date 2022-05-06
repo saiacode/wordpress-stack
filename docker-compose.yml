@@ -4,8 +4,8 @@ version: '3.8'
 # Net mariadb-public
 # Net traefik-public
 # Config php_upload_64M
-# Dir /wp_m34/${NAME}/wordpress
-# Dir /wp_m34/${NAME}/filebrowser_config
+# Dir /mnt/${NAME}/wordpress
+# Dir /mnt/${NAME}/filebrowser_config
 # Secrets   - MARIADB_USER_SECRET - MARIADB_PASSWORD_SECRET 
 # NAME required
 # DOMAIN required
@@ -38,7 +38,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.gluster.volume == wp_m34
+          - node.labels.gluster == volume00
           - node.role == worker
       labels:
         - traefik.enable=true
@@ -57,7 +57,7 @@ services:
         target: /usr/local/etc/php/conf.d/custom.ini
         mode: 0440
     volumes:
-      - /wp_m34/${NAME}/wordpress:/var/www/html
+      - /mnt/${NAME}/wordpress:/var/www/html
     secrets:
       - mariadb-user
       - mariadb-password
@@ -76,7 +76,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.labels.gluster.volume == wp_m34
+          - node.labels.gluster == volume00
           - node.role == worker
       labels:
         - traefik.enable=true
@@ -93,8 +93,8 @@ services:
     environment:
       FB_BASEURL: "/${NAME}/"
     volumes:
-      - /wp_m34/${NAME}/wordpress:/data/${NAME}
-      - /wp_m34/${NAME}/filebrowser_config:/config
+      - /mnt/${NAME}/wordpress:/data/${NAME}
+      - /mnt/${NAME}/filebrowser_config:/config
     networks:
       - ingress   
   
