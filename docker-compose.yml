@@ -6,7 +6,7 @@ version: '3.8'
 # Config php_upload_64M
 # Dir /mnt/${NAME}/wordpress
 # Dir /mnt/${NAME}/filebrowser_config
-# Secrets   - MARIADB_USER_SECRET - MARIADB_PASSWORD_SECRET 
+# Secrets   - MARIADB_PASSWORD_SECRET 
 # NAME required
 # DOMAIN required
 # WP_VERSION  optional
@@ -14,9 +14,6 @@ version: '3.8'
 
 
 secrets:
-  mariadb-user:
-    external: true
-    name: ${MARIADB_USER_SECRET}
   mariadb-password:
     external: true
     name: ${MARIADB_PASSWORD_SECRET}
@@ -62,13 +59,12 @@ services:
     volumes:
       - /mnt/${NAME}/wordpress:/var/www/html
     secrets:
-      - mariadb-user
       - mariadb-password
     environment:
       WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_USER_FILE: /run/secrets/mariadb-user
+      WORDPRESS_DB_USER: ${NAME}
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
-      WORDPRESS_DB_NAME: ${NAME}-wp
+      WORDPRESS_DB_NAME: ${NAME}
       WORDPRESS_TABLE_PREFIX: ${NAME}_
     networks:
       - ingress
