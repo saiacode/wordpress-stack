@@ -10,6 +10,7 @@ version: '3.8'
 # NAME required
 # DOMAIN required
 # WP_VERSION  optional
+# labels on nodes gluster=volume00 wordpress=production
 
 
 secrets:
@@ -36,10 +37,11 @@ services:
   wordpress:
     image: wordpress:${WP_VERSION-5.8-php8.0-apache}
     deploy:
-      replicas: 3
+      replicas: 2
       placement:
         constraints:
           - node.labels.gluster == volume00
+          - node.labels.wordpress == production
           - node.role == worker
       labels:
         - traefik.enable=true
@@ -75,9 +77,11 @@ services:
   filebrowser:
     image: hurlenko/filebrowser
     deploy:
+      replicas: 2
       placement:
         constraints:
           - node.labels.gluster == volume00
+          - node.labels.wordpress == production
           - node.role == worker
       labels:
         - traefik.enable=true
