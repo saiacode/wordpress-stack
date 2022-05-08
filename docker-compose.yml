@@ -34,6 +34,10 @@ services:
   wordpress:
     image: wordpress:${WP_VERSION-5.8-php8.0-apache}
     deploy:
+      resources:
+        limits:
+          cpu: '0.5'
+          memory: 500M
       replicas: 3
       placement:
         constraints:
