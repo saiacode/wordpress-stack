@@ -41,7 +41,7 @@ services:
         reservations:
           cpus: '0.05'
           memory: 60M
-      replicas: 3
+      replicas: 1
       placement:
         constraints:
           - node.labels.gluster == volume00
