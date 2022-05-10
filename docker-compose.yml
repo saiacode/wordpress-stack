@@ -87,10 +87,10 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+        - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)
         - traefik.http.routers.${NAME}-filebrowser-http.entrypoints=http
         - traefik.http.routers.${NAME}-filebrowser-http.middlewares=https-redirect
-        - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)"
+        - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)
         - traefik.http.routers.${NAME}-filebrowser-https.entrypoints=https
         - traefik.http.routers.${NAME}-filebrowser-https.tls=true
         - traefik.http.routers.${NAME}-filebrowser-https.tls.certresolver=le
