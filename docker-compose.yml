@@ -38,6 +38,9 @@ services:
         limits:
           cpus: '0.5'
           memory: 500M
+        reservations:
+          cpus: '0.05'
+          memory: 60M
       replicas: 3
       placement:
         constraints:
