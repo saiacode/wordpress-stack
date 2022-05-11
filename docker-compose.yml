@@ -37,15 +37,14 @@ services:
       resources:
         limits:
           cpus: '1.66'
-          memory: 3000M
+          memory: 1500M
         reservations:
           cpus: '0.25'
           memory: 500M
       replicas: 1
       placement:
         constraints:
-          - node.labels.gluster == volume00
-          - node.labels.wordpress == production
+          - node.labels.gluster == volume00 - node.labels.wordpress == production
           - node.role == worker
       labels:
         - traefik.enable=true
@@ -72,7 +71,7 @@ services:
       WORDPRESS_DB_USER: ${NAME}
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
       WORDPRESS_DB_NAME: ${NAME}
-      WORDPRESS_TABLE_PREFIX: ${NAME}_
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_NAME-wp}_
     networks:
       - ingress
       - db
