@@ -85,9 +85,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.gluster == volume00
-          - node.labels.wordpress == production
-          - node.role == worker
+          - node.labels.${NAME-wordpress} == production
       labels:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
