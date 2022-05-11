@@ -4,13 +4,11 @@ version: '3.8'
 # Net mariadb-public
 # Net traefik-public
 # Config php_upload_64M
-# Dir /mnt/${NAME}/wordpress
-# Dir /mnt/${NAME}/filebrowser_config
 # Secrets   - MARIADB_PASSWORD_SECRET 
 # NAME required
 # DOMAIN required
 # WP_VERSION  optional
-# labels on nodes gluster=volume00 wordpress=production
+# labels on nodes NAME = production 
 
 
 secrets:
@@ -74,7 +72,7 @@ services:
       WORDPRESS_DB_USER: ${NAME}
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
       WORDPRESS_DB_NAME: ${NAME}
-      WORDPRESS_TABLE_PREFIX: ${NAME}_
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX-wp}_
     networks:
       - ingress
       - db
