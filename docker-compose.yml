@@ -37,9 +37,9 @@ services:
       resources:
         limits:
           cpus: '1.66'
-          memory: 1500M
+          memory: 3000M
         reservations:
-          cpus: '0.33'
+          cpus: '0.25'
           memory: 500M
       replicas: 1
       placement:
