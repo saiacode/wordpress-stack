@@ -1,16 +1,5 @@
 version: '3.8'
 
-# Requires
-# Net mariadb-public
-# Net traefik-public
-# Config php_upload_64M
-# Secrets   - MARIADB_PASSWORD_SECRET 
-# NAME required
-# DOMAIN required
-# WP_VERSION  optional
-# labels on nodes NAME = production 
-
-
 secrets:
   mariadb-password:
     external: true
@@ -46,11 +35,11 @@ services:
       replicas: ${WP_REPLICAS}
       placement:
         constraints:
-          - node.labels.wordpress.production == 1
+          - node.labels.wordpress.${NODE_LABEL} == 1
       labels:
         - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=${INGRESS_NET}
+        - traefik.constraint-label=${INGRESS_NET}
         - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.${NAME}-wordpress-http.entrypoints=http
         - traefik.http.routers.${NAME}-wordpress-http.middlewares=https-redirect
@@ -83,11 +72,11 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.labels.wordpress.production == 1
+          - node.labels.wordpress.${NODE_LABEL} == 1
       labels:
         - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
+        - traefik.docker.network=${INGRESS_NET}
+        - traefik.constraint-label=${INGRESS_NET}
         - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`${DRIVE_DOMAIN}`) && PathPrefix(`/${NAME}`)
         - traefik.http.routers.${NAME}-filebrowser-http.entrypoints=http
         - traefik.http.routers.${NAME}-filebrowser-http.middlewares=https-redirect
