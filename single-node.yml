@@ -23,10 +23,10 @@ volumes:
 networks:
   db:
     external: true
-    name: mariadb-public
+    name: ${DB_NET}
   ingress:
     external: true
-    name: traefik-public
+    name: ${INGRESS_NET}
     
 configs:
   php_upload_64M:
@@ -34,19 +34,19 @@ configs:
 
 services:
   wordpress:
-    image: wordpress:${WP_VERSION-5.8-php8.0-apache}
+    image: ${WP_IMAGE}
     deploy:
       resources:
         limits:
-          cpus: '1.66'
-          memory: 1500M
+          cpus: ${WP_CPU_LIMIT}
+          memory: ${WP_MEMORY_LIMIT}
         reservations:
-          cpus: '0.33'
-          memory: 500M
-      replicas: 1
+          cpus: ${WP_CPU_RESERVATION}
+          memory: ${WP_MEMORY_RESERVATION}
+      replicas: ${WP_REPLICAS}
       placement:
         constraints:
-          - node.labels.${NAME-wordpress} == production
+          - node.labels.wordpress.production == 1
       labels:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
@@ -72,26 +72,26 @@ services:
       WORDPRESS_DB_USER: ${NAME}
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
       WORDPRESS_DB_NAME: ${NAME}
-      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX-wp}_
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX-wp_}
     networks:
       - ingress
       - db
       
   filebrowser:
-    image: hurlenko/filebrowser
+    image: ${FB_IMAGE}
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.labels.${NAME-wordpress} == production
+          - node.labels.wordpress.production == 1
       labels:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)
+        - traefik.http.routers.${NAME}-filebrowser-http.rule=Host(`${DRIVE_DOMAIN}`) && PathPrefix(`/${NAME}`)
         - traefik.http.routers.${NAME}-filebrowser-http.entrypoints=http
         - traefik.http.routers.${NAME}-filebrowser-http.middlewares=https-redirect
-        - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`cloud.saia.ar`) && PathPrefix(`/${NAME}`)
+        - traefik.http.routers.${NAME}-filebrowser-https.rule=Host(`${DRIVE_DOMAIN}`) && PathPrefix(`/${NAME}`)
         - traefik.http.routers.${NAME}-filebrowser-https.entrypoints=https
         - traefik.http.routers.${NAME}-filebrowser-https.tls=true
         - traefik.http.routers.${NAME}-filebrowser-https.tls.certresolver=le
