@@ -40,10 +40,10 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${INGRESS_NET}
         - traefik.constraint-label=${INGRESS_NET}
-        - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${NAME}.saia.ar`)`)
+        - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${NAME}.saia.ar`)
         - traefik.http.routers.${NAME}-wordpress-http.entrypoints=http
         - traefik.http.routers.${NAME}-wordpress-http.middlewares=https-redirect
-        - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${NAME}.saia.ar`)`)
+        - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${NAME}.saia.ar`)
         - traefik.http.routers.${NAME}-wordpress-https.entrypoints=https
         - traefik.http.routers.${NAME}-wordpress-https.tls=true
         - traefik.http.routers.${NAME}-wordpress-https.tls.certresolver=le
