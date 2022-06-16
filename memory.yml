@@ -18,7 +18,7 @@ networks:
     name: ${INGRESS_NET}
     
 configs:
-  php_upload_128M_no_memory_limit:
+  php_upload_64M:
     external: true
 
 services:
@@ -40,10 +40,10 @@ services:
         - traefik.enable=true
         - traefik.docker.network=${INGRESS_NET}
         - traefik.constraint-label=${INGRESS_NET}
-        - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${NAME}.saia.ar`)
+        - traefik.http.routers.${NAME}-wordpress-http.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.${NAME}-wordpress-http.entrypoints=http
         - traefik.http.routers.${NAME}-wordpress-http.middlewares=https-redirect
-        - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${NAME}.saia.ar`)
+        - traefik.http.routers.${NAME}-wordpress-https.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
         - traefik.http.routers.${NAME}-wordpress-https.entrypoints=https
         - traefik.http.routers.${NAME}-wordpress-https.tls=true
         - traefik.http.routers.${NAME}-wordpress-https.tls.certresolver=le
@@ -58,10 +58,10 @@ services:
       - mariadb-password
     environment:
       WORDPRESS_DB_HOST: mariadb
-      WORDPRESS_DB_USER: stg
+      WORDPRESS_DB_USER: ${NAME}
       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/mariadb-password
-      WORDPRESS_DB_NAME: stg
-      WORDPRESS_TABLE_PREFIX: ${NAME}
+      WORDPRESS_DB_NAME: ${NAME}
+      WORDPRESS_TABLE_PREFIX: ${WP_TABLE_PREFIX-wp_}
     networks:
       - ingress
       - db
